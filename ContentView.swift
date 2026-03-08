@@ -9,65 +9,58 @@ import SwiftUI
 import AppKit
 import Combine
 
-struct Box: Identifiable, Equatable {
+struct ClipItem: Identifiable {
     let id = UUID()
     let color: Color
-    let position: CGPoint
-    let content: String // stores what was copied
+    let content: String
+    let timestamp: Date
 }
 
 struct ContentView: View {
-    @State private var boxes: [Box] = []
+    @State private var clips: [ClipItem] = []
     @State private var lastChangeCount: Int = NSPasteboard.general.changeCount
-    
+
     let colors: [Color] = [.blue, .red, .green, .orange, .purple, .pink, .teal]
-    
-    // Timer that polls the clipboard every 0.5s
-    let timer = Timer.publish(every: 0.5, on: .main, in: .common) .autoconnect()
-    
-    private func addBox(content: String) {
-        let size = CGSize(width: 100, height: 100)
-        // Use the main screen size as a simple placement area; clamp so boxes stay within view bounds.
-        let screen = NSScreen.main?.frame.size ?? CGSize(width: 800, height: 600)
-        let margin: CGFloat = 60
-        let maxX = max(margin, screen.width - margin)
-        let maxY = max(margin, screen.height - margin)
-        let position = CGPoint(x: .random(in: margin...maxX), y: .random(in: margin...maxY))
+    let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
+
+    private func addClip(content: String) {
         let color = colors.randomElement() ?? .blue
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
-            boxes.append(Box(color: color, position: position, content: content))
+            clips.insert(ClipItem(color: color, content: content, timestamp: Date()), at: 0)
         }
-        let newBox = Box(color: color, position: position, content: content)
-        boxes.append(newBox)
     }
-    
+
     var body: some View {
-        ZStack {
-            Color(.windowBackgroundColor).ignoresSafeArea()
-            
-            ForEach(boxes) { box in
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(box.color.opacity(0.85))
-                    .frame(width: 100, height: 100)
-                    .overlay(
-                        VStack {
-                            Text(box.content)
-                                .font(.system(size: 10))
-                                .foregroundStyle(.white)
-                                .lineLimit(4)
-                                .padding(6)
+        VStack(spacing: 0) {
+            // Header
+            HStack {
+                Image(systemName: "doc.on.clipboard.fill")
+                    .foregroundStyle(.secondary)
+                Text("ClipKeeper")
+                    .font(.headline)
+                Spacer()
+                if !clips.isEmpty {
+                    Button(role: .destructive) {
+                        withAnimation {
+                            clips.removeAll()
                         }
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .strokeBorder(Color.white.opacity(0.3), lineWidth: 1.5)
-                    )
-                    .shadow(color: box.color.opacity(0.4), radius: 8, x: 0, y: 4)
-                    .position(box.position)
-                    .transition(.scale(scale: 0.5).combined(with: .opacity))
+                    } label: {
+                        Text("Clear All")
+                            .font(.caption)
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.red.opacity(0.8))
+                }
             }
-            
-            if boxes.isEmpty {
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(.bar)
+
+            Divider()
+
+            // List or empty state
+            if clips.isEmpty {
+                Spacer()
                 VStack(spacing: 8) {
                     Image(systemName: "doc.on.clipboard")
                         .font(.system(size: 40))
@@ -76,16 +69,62 @@ struct ContentView: View {
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
+                Spacer()
+            } else {
+                List {
+                    ForEach(clips) { clip in
+                        HStack(spacing: 12) {
+                            // Colour tag
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(clip.color)
+                                .frame(width: 6)
+                                .frame(maxHeight: .infinity)
+
+                            // Content
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(clip.content)
+                                    .font(.system(size: 13))
+                                    .lineLimit(2)
+                                Text(clip.timestamp, style: .time)
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+
+                            Spacer()
+
+                            // Copy back button
+                            Button {
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(clip.content, forType: .string)
+                            } label: {
+                                Image(systemName: "doc.on.doc")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .help("Copy to clipboard")
+                        }
+                        .padding(.vertical, 6)
+                        .swipeActions(edge: .trailing) {
+                            Button(role: .destructive) {
+                                withAnimation {
+                                    clips.removeAll { $0.id == clip.id }
+                                }
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
+                        }
+                    }
+                }
+                .listStyle(.inset)
             }
         }
-        .frame(minWidth: 500, minHeight: 400)
-        // Poll clipboard every 0.5s
+        .frame(minWidth: 400, minHeight: 300)
         .onReceive(timer) { _ in
             let pb = NSPasteboard.general
             if pb.changeCount != lastChangeCount {
                 lastChangeCount = pb.changeCount
                 if let copied = pb.string(forType: .string) {
-                    addBox(content: copied)
+                    addClip(content: copied)
                 }
             }
         }
