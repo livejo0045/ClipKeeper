@@ -34,7 +34,7 @@ struct ContentView: View {
         let maxY = max(margin, screen.height - margin)
         let position = CGPoint(x: .random(in: margin...maxX), y: .random(in: margin...maxY))
         let color = colors.randomElement() ?? .blue
-        withAnimation(.spring(response: 0.35, dampingfraction: 0.7)) {
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
             boxes.append(Box(color: color, position: position, content: content))
         }
         let newBox = Box(color: color, position: position, content: content)
