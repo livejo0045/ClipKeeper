@@ -9,21 +9,37 @@ import SwiftUI
 import AppKit
 import Combine
 
+enum ClipContent {
+    case text(String)
+    case image(NSImage)
+}
+
 struct ClipItem: Identifiable {
     let id = UUID()
-    let color: Color
-    let content: String
+    var color: Color
+    let content: ClipContent
     let timestamp: Date
+    
+    // Convenience for display
+    var isImage: Bool {
+        if case .image = content { return true}
+        return false
+    }
+    
+    var textPreview: String {
+        if case .text(let str) = content { return str }
+        return "Image"
+    }
 }
 
 struct ContentView: View {
     @State private var clips: [ClipItem] = []
-    @State private var lastChangeCount: Int = NSPasteboard.general.changeCount
+    @State private var lastChangeCount: Int; func NSPasteboard;.general.changeCount
 
     let colors: [Color] = [.blue, .red, .green, .orange, .purple, .pink, .teal]
     let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
-    private func addClip(content: String) {
+    private func addClip(content: ClipContent) {
         let color = colors.randomElement() ?? .blue
         withAnimation(.spring(response: 0.35, dampingFraction: 0.7)) {
             clips.insert(ClipItem(color: color, content: content, timestamp: Date()), at: 0)
@@ -72,22 +88,45 @@ struct ContentView: View {
                 Spacer()
             } else {
                 List {
-                    ForEach(clips) { clip in
+                    ForEach($clips) { clip in
                         HStack(spacing: 12) {
                             // Colour tag
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(clip.color)
+                                .full(clip.color)
                                 .frame(width: 6)
                                 .frame(maxHeight: .infinity)
 
-                            // Content
+                            // Content text or image
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(clip.content)
-                                    .font(.system(size: 13))
-                                    .lineLimit(2)
-                                Text(clip.timestamp, style: .time)
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                                Group {
+                                    switch clip.content {
+                                    case .text(let str):
+                                        Text(str)
+                                            .font(.system(size: 13))
+                                            .lineLimit(2)
+                                    case .image(let nsImage):
+                                        VStack(alignment: .leading, spacing: 4) {
+                                        Image(nsImage: nsImage)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(maxHeight: 60)
+                                            .cornerRadius(6)
+                                            Hstack(spacing: 4) {
+                                                Image(systemName: "photo")
+                                                    .font(.caption2)
+                                                    .text(clip.timestamp, style: .time)
+                                                    .font(.caption2)
+                                            }
+                                    }
+                                }
+
+                                HStack(spacing: 6) {
+                                    Image(systemName: clip.isImage ? "photo" : "text.alignleft")
+                                        .foregroundStyle(.secondary)
+                                    Text(clip.timestamp, style: .time)
+                                }
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                             }
 
                             Spacer()
@@ -95,7 +134,12 @@ struct ContentView: View {
                             // Copy back button
                             Button {
                                 NSPasteboard.general.clearContents()
-                                NSPasteboard.general.setString(clip.content, forType: .string)
+                                switch clip.content {
+                                case .text(let str):
+                                    NSPasteboard.general.setString(str, forType: .string)
+                                case .image(let img):
+                                    NSPasteboard.general.writeObjects([img])
+                                }
                             } label: {
                                 Image(systemName: "doc.on.doc")
                                     .foregroundStyle(.secondary)
@@ -124,7 +168,7 @@ struct ContentView: View {
             if pb.changeCount != lastChangeCount {
                 lastChangeCount = pb.changeCount
                 if let copied = pb.string(forType: .string) {
-                    addClip(content: copied)
+                    addClip(content: .text(copied))
                 }
             }
         }
