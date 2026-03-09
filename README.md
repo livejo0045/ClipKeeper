@@ -73,7 +73,6 @@ Please open an issue first for major changes so we can discuss the approach.
 - [ ] Image clip support
 - [ ] Pin important clips to the top
 - [ ] Keyboard shortcut to open/focus the window
-- [ ] 
 ---
 
 ## Author
