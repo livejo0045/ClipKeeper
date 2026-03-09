@@ -111,11 +111,6 @@ struct ContentView: View {
                                             .scaledToFit()
                                             .frame(maxHeight: 60)
                                             .cornerRadius(6)
-                                            Hstack(spacing: 4) {
-                                                Image(systemName: "photo")
-                                                    .font(.caption2)
-                                                    .text(clip.timestamp, style: .time)
-                                                    .font(.caption2)
                                             }
                                     }
                                 }
