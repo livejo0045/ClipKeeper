@@ -17,7 +17,7 @@ enum ClipContent {
 struct ClipItem: Identifiable {
     let id = UUID()
     var color: Color
-    let content: ClipContent
+    var content: ClipContent
     let timestamp: Date
     
     // Convenience for display
@@ -34,7 +34,7 @@ struct ClipItem: Identifiable {
 
 struct ContentView: View {
     @State private var clips: [ClipItem] = []
-    @State private var lastChangeCount: Int; func NSPasteboard;.general.changeCount
+    @State private var lastChangeCount: Int = NSPasteboard.general.changeCount
 
     let colors: [Color] = [.blue, .red, .green, .orange, .purple, .pink, .teal]
     let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
@@ -88,11 +88,11 @@ struct ContentView: View {
                 Spacer()
             } else {
                 List {
-                    ForEach($clips) { clip in
+                    ForEach(clips) { clip in
                         HStack(spacing: 12) {
                             // Colour tag
                             RoundedRectangle(cornerRadius: 4)
-                                .full(clip.color)
+                                .fill(clip.color)
                                 .frame(width: 6)
                                 .frame(maxHeight: .infinity)
 
@@ -105,13 +105,11 @@ struct ContentView: View {
                                             .font(.system(size: 13))
                                             .lineLimit(2)
                                     case .image(let nsImage):
-                                        VStack(alignment: .leading, spacing: 4) {
                                         Image(nsImage: nsImage)
                                             .resizable()
                                             .scaledToFit()
                                             .frame(maxHeight: 60)
                                             .cornerRadius(6)
-                                            }
                                     }
                                 }
 
@@ -160,6 +158,16 @@ struct ContentView: View {
         .frame(minWidth: 400, minHeight: 300)
         .onReceive(timer) { _ in
             let pb = NSPasteboard.general
+            guard pb.changeCount != lastChangeCount else { return }
+            lastChangeCount = pb.changeCount
+            
+            // Check for image first, then text
+            if let image = NSImage(pasteboard: pb) {
+                addClip(content: .image(image))
+            } else if let text = pb.string(forType: .string) {
+                addClip(content: .text(text))
+            }
+            
             if pb.changeCount != lastChangeCount {
                 lastChangeCount = pb.changeCount
                 if let copied = pb.string(forType: .string) {
@@ -169,3 +177,4 @@ struct ContentView: View {
         }
     }
 }
+

@@ -16,48 +16,37 @@
       "filename" : "ClipKeeper-icon 2.png",
       "idiom" : "mac",
       "scale" : "1x",
-      "size" : "32x32"
+      "size" : "18x18"
     },
     {
       "filename" : "ClipKeeper-icon 3.png",
       "idiom" : "mac",
       "scale" : "2x",
-      "size" : "32x32"
+      "size" : "18x18"
     },
     {
       "filename" : "ClipKeeper-icon 4.png",
       "idiom" : "mac",
       "scale" : "1x",
-      "size" : "128x128"
+      "size" : "24x24"
     },
     {
       "filename" : "ClipKeeper-icon 5.png",
       "idiom" : "mac",
       "scale" : "2x",
-      "size" : "128x128"
+      "size" : "24x24"
     },
     {
       "filename" : "ClipKeeper-icon 6.png",
       "idiom" : "mac",
       "scale" : "1x",
-      "size" : "256x256"
+      "size" : "32x32"
     },
     {
       "filename" : "ClipKeeper-icon 7.png",
       "idiom" : "mac",
       "scale" : "2x",
-      "size" : "256x256"
-    },
-    {
-      "filename" : "ClipKeeper-icon 8.png",
-      "idiom" : "mac",
-      "scale" : "1x",
-      "size" : "512x512"
-    },
-    {
-      "idiom" : "mac",
-      "scale" : "2x",
-      "size" : "512x512"
+      "size" : "32x32"
     }
   ],
   "info" : {
