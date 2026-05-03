@@ -11,11 +11,14 @@ import CoreData
 @main
 struct ClipKeeperApp: App {
     let persistenceController = PersistenceController.shared
-
+    
     var body: some Scene {
-        WindowGroup {
+        MenuBarExtra {
             ContentView()
                 .environment(\.managedObjectContext, persistenceController.container.viewContext)
+        } label: {
+            Image (systemName: "doc.on.clipboard.fill")
         }
+        .menuBarExtraStyle(.window)
     }
 }

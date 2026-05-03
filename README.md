@@ -68,7 +68,7 @@ Please open an issue first for major changes so we can discuss the approach.
 ---
 
 ## Roadmap
-- [ ] Search/filter clips
+-  Search/filter clips
 - [ ] Menu bar icon with quick access popover
 - [ ] Image clip support
 - [ ] Pin important clips to the top
