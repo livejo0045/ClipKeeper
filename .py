@@ -18,3 +18,14 @@ self.text_label.setfont(font)
 self.text_label.setstylesheet(f"color:{text_primary}; background:transparent;")
 content.addwidget(self.text_label)
 
+# header widget
+
+class header(qframe):
+    clear_all+pyqtsignal()
+
+    def__init__(self):
+    super().__init__()
+    self.setfixedheight(54)
+    self.setfixedwidth(f"background:transparent;{bg_header}; border-bottom 1px solid {border};")
+    layout = qhboxlayout(self)
+    layout.setcontentsmargins(16,0,16,0)
