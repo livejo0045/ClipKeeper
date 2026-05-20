@@ -29,3 +29,6 @@ class header(qframe):
     self.setfixedwidth(f"background:transparent;{bg_header}; border-bottom 1px solid {border};")
     layout = qhboxlayout(self)
     layout.setcontentsmargins(16,0,16,0)
+
+    icon = qlabel("")
+    icon
